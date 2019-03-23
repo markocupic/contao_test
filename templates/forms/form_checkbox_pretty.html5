@@ -1,0 +1,45 @@
+<?php $this->extend('form_row'); ?>
+
+<?php $this->block('field'); ?>
+<div id="ctrl_<?= $this->id ?>" class="checkbox_container<?php if ($this->class) echo ' ' . $this->class; ?>">
+
+    <?php if ($this->label): ?>
+    <legend>
+        <?php if ($this->mandatory): ?>
+        <span class="invisible"><?= $this->mandatoryField ?> </span><?= $this->label ?><span class="mandatory">*</span>
+        <?php else: ?>
+        <?= $this->label ?>
+        <?php endif; ?>
+    </legend>
+    <?php endif; ?>
+
+
+    <input type="hidden" name="<?= $this->name ?>" value="">
+
+    <?php foreach ($this->getOptions() as $option): ?>
+        <?php if ($option['type'] == 'group_start'): ?>
+            <fieldset>
+            <legend><?= $option['label'] ?></legend>
+        <?php endif; ?>
+
+        <?php if ($option['type'] == 'option'): ?>
+        <div<?php if($this->checkboxClass != ''): ?> class="<?= $this->checkboxClass ?>"<?php endif; ?>>
+            <input type="checkbox" name="<?= $option['name'] ?>" id="opt_<?= $option['id'] ?>" class="checkbox" value="<?= $option['value'] ?>"<?= $option['checked'] ?><?= $option['attributes'] ?>>
+            <div class="state<?php if($this->stateClass != ''): ?> <?= $this->stateClass ?><?php endif; ?>">
+                <label id="lbl_<?= $option['id'] ?>" for="opt_<?= $option['id'] ?>"><?= $option['label'] ?></label>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($option['type'] == 'group_end'): ?>
+        </fieldset>
+        <?php endif; ?>
+
+    <?php endforeach; ?>
+<?php if ($this->hasErrors()): ?>
+<p class="error"><?= $this->getErrorAsString() ?></p>
+<?php endif; ?>
+
+</div>
+{{br}}
+<?php $this->endblock(); ?>
