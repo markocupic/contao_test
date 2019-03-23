@@ -40,7 +40,22 @@ class ModuleTestForm extends Module
     /**
      * @var
      */
+    protected $objUser;
+
+    /**
+     * @var
+     */
     protected $arrFields;
+
+    /**
+     * @var
+     */
+    protected $objCurrentTestSession;
+
+    /**
+     * @var
+     */
+    protected $objCurrentTestPage;
 
     /**
      * Display a wildcard in the back end
@@ -59,8 +74,26 @@ class ModuleTestForm extends Module
             $objTemplate->id = $this->id;
             $objTemplate->link = $this->name;
             $objTemplate->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
-
             return $objTemplate->parse();
+        }
+
+        if (FE_USER_LOGGED_IN)
+        {
+            $objUser = FrontendUser::getInstance();
+            $this->objUser = MemberModel::findByPk($objUser->id);
+        }
+        else
+        {
+            return '';
+        }
+
+        // Do this before $this->getCurrentTestPage();
+        // Get $objCurrentTestSession
+        $this->getCurrentTestSession();
+
+        // Get $objCurrentTestPage;
+        if($this->getCurrentTestPage() === null){
+            return '';
         }
 
         return parent::generate();
@@ -75,7 +108,8 @@ class ModuleTestForm extends Module
 
         $this->Template->form = $this->form;
         $this->Template->arrFields = $this->arrFields;
-        $this->Template->x = $this->checkboxClass;
+        $this->Template->objCurrentTestPage = $this->objCurrentTestPage;
+        $this->Template->objCurrentTestSession = $this->objCurrentTestSession;
     }
 
     protected function generateForm()
@@ -87,7 +121,7 @@ class ModuleTestForm extends Module
         $arrFields = [];
         if (($objTestPage = $this->getTestPage()) !== null)
         {
-            $objQuestions = Database::getInstance()->prepare('SELECT * FROM tl_test_question WHERE pid=? ORDER BY sorting')->execute($objTestPage->id);
+            $objQuestions = Database::getInstance()->prepare('SELECT * FROM tl_test_question WHERE pid=? ORDER BY sorting')->execute($this->objCurrentTestPage->id);
             while ($objQuestions->next())
             {
                 $ffname = 'test_question_' . $objQuestions->id;
@@ -110,7 +144,7 @@ class ModuleTestForm extends Module
         // validate() also checks whether the form has been submitted
         if ($this->form->validate())
         {
-            $blnHasError = false;
+            $blnHasAnsweredCorrectly = true;
 
             $arrFormFields = $this->form->getFormFields();
 
@@ -120,19 +154,37 @@ class ModuleTestForm extends Module
                 {
                     $objWidget = $this->form->getWidget($fieldname);
 
-                    if ($this->isAnswerRight($objWidget, $questionId))
-                    {
-                    }
-                    else
+                    if (!$this->isAnswerRight($objWidget, $questionId))
                     {
                         $objWidget->addError('Falsche Antwort!');
-                        $blnHasError = true;
+                        $blnHasAnsweredCorrectly = false;
                     }
                 }
             }
 
-            if (!$blnHasError)
+            // Save answer to db
+            $objSessionAnswer = new TestSessionAnswerModel();
+            $objSessionAnswer->pid = $this->objCurrentTestSession->id;
+            $objSessionAnswer->tstamp = time();
+            $objSessionAnswer->testPageId = $this->objCurrentTestPage->id;
+            $objSessionAnswer->save();
+            $this->objCurrentTestSession->tstamp = time();
+            $this->objCurrentTestSession->save();
+
+            if ($blnHasAnsweredCorrectly)
             {
+                $objSessionAnswer->isCorrectAnswer = '1';
+                $objSessionAnswer->save();
+                if ($this->getLastTestPage() !== null)
+                {
+                    if ($this->getLastTestPage()->id === $this->objCurrentTestPage->id)
+                    {
+                        $this->objCurrentTestSession->hasFinished = '1';
+                        $this->objCurrentTestSession->timeEnd = time();
+                        $this->objCurrentTestSession->save();
+                    }
+                }
+
                 $this->reload();
             }
         }
@@ -178,6 +230,80 @@ class ModuleTestForm extends Module
             throw new \Exception(sprintf('Question tl_test_question with id=%s does not exist.', $questionId));
         }
         return false;
+    }
+
+    /**
+     * @return TestSessionModel
+     */
+    protected function getCurrentTestSession()
+    {
+        $objTestPage = Database::getInstance()->prepare('SELECT id FROM tl_test_session WHERE hasFinished=? AND memberId=?')->limit(1)->execute('', $this->objUser->id);
+        if ($objTestPage->numRows)
+        {
+            $this->objCurrentTestSession = TestSessionModel::findByPk($objTestPage->id);
+            $this->objCurrentTestSession->tstamp = time();
+            $this->objCurrentTestSession->save();
+        }
+        else
+        {
+            $this->objCurrentTestSession = new TestSessionModel();
+            $this->objCurrentTestSession->tstamp = time();
+            $this->objCurrentTestSession->testId = $this->testitem;
+            $this->objCurrentTestSession->timeStart = time();
+            $this->objCurrentTestSession->memberId = $this->objUser->id;
+            $this->objCurrentTestSession->save();
+        }
+        return $this->objCurrentTestSession;
+    }
+
+    /**
+     * @return TestPageModel|mixed|null
+     */
+    protected function getCurrentTestPage()
+    {
+        if ($this->objCurrentTestSession === null)
+        {
+            $this->getCurrentTestSession();
+        }
+
+        if ($this->objCurrentTestSession === null)
+        {
+            throw new \Exception('objCurrentTestSession can not be null.');
+        }
+
+        $objTestPages = Database::getInstance()->prepare('SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting ASC')->execute($this->testitem);
+        while ($objTestPages->next())
+        {
+            $objTestPage = Database::getInstance()->prepare('SELECT * FROM tl_test_session_answer WHERE isCorrectAnswer=? AND pid=? AND testPageId=?')->execute('1', $this->objCurrentTestSession->id, $objTestPages->id);
+            if (!$objTestPage->numRows)
+            {
+                $this->objCurrentTestPage = TestPageModel::findByPk($objTestPages->id);
+                return $this->objCurrentTestPage;
+            }
+        }
+
+        $objTestPage = Database::getInstance()->prepare('SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting ASC')->limit(1)->execute($this->testitem);
+        if ($objTestPage->numRows)
+        {
+            $this->objCurrentTestPage = TestPageModel::findByPk($objTestPage->id);
+            return $this->objCurrentTestPage;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return TestPageModel|mixed|null
+     */
+    protected function getLastTestPage()
+    {
+        $objTestPage = Database::getInstance()->prepare('SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting DESC')->limit(1)->execute($this->testitem);
+        if ($objTestPage->numRows)
+        {
+            return TestPageModel::findByPk($objTestPage->id);
+        }
+
+        return null;
     }
 }
 

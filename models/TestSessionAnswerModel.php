@@ -13,19 +13,19 @@ namespace Contao;
 use Contao\Model\Collection;
 
 /**
- * Class TestPageModel
+ * Class TestSessionAnswerModel
  * @package Contao
  */
-class TestPageModel extends Model
+class TestSessionAnswerModel extends Model
 {
 
 	/**
 	 * Table name
 	 * @var string
 	 */
-	protected static $strTable = 'tl_test_page';
+	protected static $strTable = 'tl_test_session_answer';
 
 
 }
 
-class_alias(TestPageModel::class, 'TestPageModel');
+class_alias(TestSessionAnswerModel::class, 'TestSessionAnswerModel');

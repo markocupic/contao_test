@@ -33,5 +33,8 @@ ClassLoader::addClasses(array
     'Contao\TestModel' => 'system/modules/test/models/TestModel.php',
     'Contao\TestPageModel' => 'system/modules/test/models/TestPageModel.php',
     'Contao\TestQuestionModel' => 'system/modules/test/models/TestQuestionModel.php',
+    'Contao\TestSessionModel' => 'system/modules/test/models/TestSessionModel.php',
+    'Contao\TestSessionAnswerModel' => 'system/modules/test/models/TestSessionAnswerModel.php',
+
 
 ));

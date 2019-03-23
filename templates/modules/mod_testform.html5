@@ -3,6 +3,8 @@
 <?php $this->block('content'); ?>
 
 
+<h4><?= $this->objCurrentTestPage->title ?></h4>
+<h4>Test Session-ID: <?= $this->objCurrentTestSession->id ?></h4>
 
 <?php if($this->form): ?>
 <?php $GLOBALS['TL_CSS'][] = 'https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css'; ?>
