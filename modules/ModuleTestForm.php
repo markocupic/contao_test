@@ -112,28 +112,28 @@ class ModuleTestForm extends Module
 
         // Keep this order: call $this->getActiveTestSession() before $this->getActiveTestPage();
         // Set class property $objActiveTestSession
-        $this->getActiveTestSession();
+        $this->setActiveTestSession();
 
         // Set class property $objActiveTestPage;
-        if ($this->getActiveTestPage() === null)
+        if ($this->setActiveTestPage() === null)
         {
             return '';
         }
 
         // Set class property $this->activePageIndex. Attention: first index is 0
-        $this->getActivePageIndex();
+        $this->setActivePageIndex();
 
         // Set class property $this->pagesTotal
-        $this->getPagesTotal();
+        $this->setPagesTotal();
 
         // Set class property $this->firstTestPage
-        $this->getFirstTestPage();
+        $this->setFirstTestPage();
 
         // Set class property $this->LastTestPage
-        $this->getLastTestPage();
+        $this->setLastTestPage();
 
         // Set class property $this->pagesTotal
-        $this->getPagesTotal();
+        $this->setPagesTotal();
 
         return parent::generate();
     }
@@ -304,7 +304,7 @@ class ModuleTestForm extends Module
      * Set class property $this->objActiveTestSession
      * @return TestSessionModel
      */
-    protected function getActiveTestSession()
+    protected function setActiveTestSession()
     {
         $objTestPage = Database::getInstance()->prepare(/** @lang mysql */
             'SELECT id FROM tl_test_session WHERE hasFinished=? AND memberId=?')->limit(1)->execute('', $this->objUser->id);
@@ -331,7 +331,7 @@ class ModuleTestForm extends Module
      * @return TestPageModel|null
      * @throws \Exception
      */
-    protected function getActiveTestPage()
+    protected function setActiveTestPage()
     {
         if ($this->objActiveTestSession === null)
         {
@@ -372,7 +372,7 @@ class ModuleTestForm extends Module
      * @return int|null
      * @throws \Exception
      */
-    protected function getActivePageIndex()
+    protected function setActivePageIndex()
     {
         if ($this->objActiveTestPage === null)
         {
@@ -404,7 +404,7 @@ class ModuleTestForm extends Module
      * Set class property $this->pagesTotal
      * @return int
      */
-    protected function getPagesTotal()
+    protected function setPagesTotal()
     {
         $objTestPages = Database::getInstance()->prepare(/** @lang mysql */
             'SELECT id FROM tl_test_page WHERE pid=? ORDER BY sorting ASC')->execute($this->testitem);
@@ -416,7 +416,7 @@ class ModuleTestForm extends Module
      * Set class property $this->objLastTestPage
      * @return TestPageModel|null
      */
-    protected function getLastTestPage()
+    protected function setLastTestPage()
     {
         $objTestPage = Database::getInstance()->prepare(/** @lang mysql */
             'SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting DESC')->limit(1)->execute($this->testitem);
@@ -433,7 +433,7 @@ class ModuleTestForm extends Module
      * Set class property $this->objFirstTestPage
      * @return TestPageModel|null
      */
-    protected function getFirstTestPage()
+    protected function setFirstTestPage()
     {
         $objTestPage = Database::getInstance()->prepare(/** @lang mysql */
             'SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting ASC')->limit(1)->execute($this->testitem);
@@ -444,6 +444,59 @@ class ModuleTestForm extends Module
         }
 
         return null;
+    }
+
+    /**
+     * @return object
+     */
+    protected function getActiveTestSession()
+    {
+        return $this->objActiveTestSession;
+    }
+
+    /**
+     * Get class property $this->objActiveTestPage
+     * @return object
+     */
+    protected function getActiveTestPage()
+    {
+        return $this->objActiveTestPage;
+    }
+
+    /**
+     * Get class property $this->activeTestPageIndex
+     * @return int
+     */
+    protected function getActivePageIndex()
+    {
+        return $this->activeTestPageIndex;
+    }
+
+    /**
+     * Get class property $this->pagesTotal
+     * @return int
+     */
+    protected function getPagesTotal()
+    {
+        return $this->pagesTotal;
+    }
+
+    /**
+     * Get class property $this->objLastTestPage
+     * @return object
+     */
+    protected function getLastTestPage()
+    {
+        return $this->objLastTestPage;
+    }
+
+    /**
+     * Get class property $this->objFirstTestPage
+     * @return object
+     */
+    protected function getFirstTestPage()
+    {
+        return $this->objFirstTestPage;
     }
 
     /**
