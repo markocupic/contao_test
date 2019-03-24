@@ -169,7 +169,7 @@ class ModuleTestForm extends Module
         });
 
         $arrQuestionFields = [];
-        if (($objTestPage = $this->getTestPage()) !== null)
+        if ($this->objActiveTestPage !== null)
         {
             $objQuestions = Database::getInstance()->prepare(/** @lang mysql */
                 'SELECT * FROM tl_test_question WHERE pid=? ORDER BY sorting')->execute($this->objActiveTestPage->id);
@@ -270,20 +270,6 @@ class ModuleTestForm extends Module
                 $this->reload();
             }
         }
-    }
-
-    /**
-     * @return TestPageModel|null
-     */
-    protected function getTestPage()
-    {
-        $objTestPage = Database::getInstance()->prepare(/** @lang mysql */
-            'SELECT id FROM tl_test_page WHERE pid=?')->limit(1)->execute($this->testitem);
-        if ($objTestPage->numRows)
-        {
-            return TestPageModel::findByPk($objTestPage->id);
-        }
-        return null;
     }
 
     /**
@@ -399,7 +385,7 @@ class ModuleTestForm extends Module
         }
 
         $i = 0;
-        
+
         $objTestPages = Database::getInstance()->prepare(/** @lang mysql */
             'SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting ASC')->execute($this->testitem);
         while ($objTestPages->next())
