@@ -44,42 +44,50 @@ class ModuleTestForm extends Module
     protected $form;
 
     /**
-     * @var
+     * Logged in member model
+     * @var object
      */
     protected $objUser;
 
     /**
-     * @var
+     * Array contains the question fieldnames of the active page
+     * @var array
      */
     protected $arrQuestionFields;
 
     /**
-     * @var
+     * Active test session model
+     * @var object
      */
     protected $objActiveTestSession;
 
     /**
-     * @var
+     * Active test page model
+     * @var object
      */
     protected $objActiveTestPage;
 
     /**
-     * @var
+     * First test page model
+     * @var object
      */
     protected $objFirstTestPage;
 
     /**
-     * @var
+     * Last test page model
+     * @var object
      */
     protected $objLastTestPage;
 
     /**
-     * @var
+     * The index of the active page
+     * @var integer
      */
     protected $activeTestPageIndex;
 
     /**
-     * @var
+     * Contains the total number of pages
+     * @var integer
      */
     protected $pagesTotal;
 
