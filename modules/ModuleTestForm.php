@@ -246,7 +246,7 @@ class ModuleTestForm extends Module
             $this->objActiveTestSession->tstamp = time();
             $this->objActiveTestSession->save();
 
-            // Redirect and close test session if all questions have been answered at least 1x
+            // Redirect and close test session if all questions have been correctly answered for at least 1x
             if ($intWrongAnswers === 0 && $this->objLastTestPage !== null)
             {
                 if ($this->objLastTestPage->id === $this->objActiveTestPage->id)
@@ -264,7 +264,7 @@ class ModuleTestForm extends Module
                 }
             }
 
-            // Only lead to text test page, if all questions were answered correctly
+            // Only lead to next test page, if all questions were answered correctly
             if ($intWrongAnswers === 0)
             {
                 $this->reload();
@@ -307,7 +307,6 @@ class ModuleTestForm extends Module
                 return true;
             }
         }
-
         else
         {
             throw new \Exception(sprintf('Question tl_test_question with id=%s does not exist.', $questionId));
@@ -398,7 +397,9 @@ class ModuleTestForm extends Module
         {
             throw new \Exception('$this->>objActiveTestPage can not be null.');
         }
+
         $i = 0;
+        
         $objTestPages = Database::getInstance()->prepare(/** @lang mysql */
             'SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting ASC')->execute($this->testitem);
         while ($objTestPages->next())
