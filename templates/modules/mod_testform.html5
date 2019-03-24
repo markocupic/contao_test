@@ -2,18 +2,29 @@
 
 <?php $this->block('content'); ?>
 
+<?php if($this->form): ?>
+<?php $GLOBALS['TL_CSS'][] = 'https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css'; ?>
+<?php endif; ?>
+
 
 <h4><?= $this->objActiveTestPage->title ?> Index: <?= $this->activeTestPageIndex+1 ?>/<?= $this->pagesTotal ?></h4>
 <h4>Test Session-ID: <?= $this->objActiveTestSession->id ?></h4>
+
+
+<?php if($this->objActiveTestPage->htmlPre != ''): ?>
+<div class="activePageHtmlPre">
+  <?= $this->objActiveTestPage->htmlPre ?>
+</div>
+<?php endif; ?>
+
 
 <?php if($this->messages): ?>
 <?= $this->messages ?>
 <?php endif; ?>
 
-<?php if($this->form): ?>
-<?php $GLOBALS['TL_CSS'][] = 'https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css'; ?>
-<div class="hasteform_<?= $this->form->getFormId() ?> block">
 
+<?php if($this->form): ?>
+<div class="hasteform_<?= $this->form->getFormId() ?> block">
   <form id="<?= $this->form->getFormId() ?>" novalidate action="<?= $this->form->getFormAction() ?>" method="<?= $this->form->getMethod() ?>" enctype="<?= $this->form->getEnctype() ?>">
     <div class="formbody">
       <?php $field = 'FORM_SUBMIT'; ?>
@@ -26,12 +37,11 @@
       <?= $this->form->getWidget($field)->parse(); ?>
       <?php endif; ?>
 
-      <?php foreach($this->arrFields as $field): ?>
+      <?php foreach($this->arrQuestionFields as $field): ?>
       <?php if ($this->form->hasFormField($field)): ?>
       <?= $this->form->getWidget($field)->parse() ?>
       <?php endif; ?>
       <?php endforeach; ?>
-
 
       <?php $field = 'submit'; ?>
       <?php if ($this->form->hasFormField($field)): ?>
@@ -41,9 +51,14 @@
         </div>
       </div>
       <?php endif; ?>
-
     </div>
   </form>
+</div>
+<?php endif; ?>
+
+<?php if($this->objActiveTestPage->htmlPost != ''): ?>
+<div class="activePageHtmlPost">
+  <?= $this->objActiveTestPage->htmlPost ?>
 </div>
 <?php endif; ?>
 

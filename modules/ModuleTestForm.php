@@ -18,9 +18,11 @@ use Patchwork\Utf8;
  * @property string $strTemplate
  * @property object $form
  * @property object $objUser
- * @property array $arrFields
+ * @property array $arrQuestionFields
  * @property object $objActiveTestSession
  * @property object $objActiveTestPage
+ * @property object $objFirstTestPage
+ * @property object $objLastTestPage
  * @property int $activeTestPageIndex
  * @property int $pagesTotal
  *
@@ -49,7 +51,7 @@ class ModuleTestForm extends Module
     /**
      * @var
      */
-    protected $arrFields;
+    protected $arrQuestionFields;
 
     /**
      * @var
@@ -60,6 +62,16 @@ class ModuleTestForm extends Module
      * @var
      */
     protected $objActiveTestPage;
+
+    /**
+     * @var
+     */
+    protected $objFirstTestPage;
+
+    /**
+     * @var
+     */
+    protected $objLastTestPage;
 
     /**
      * @var
@@ -99,19 +111,28 @@ class ModuleTestForm extends Module
         }
 
         // Keep this order: call $this->getActiveTestSession() before $this->getActiveTestPage();
-        // Get $objActiveTestSession
+        // Set class property $objActiveTestSession
         $this->getActiveTestSession();
 
-        // Get $objActiveTestPage;
+        // Set class property $objActiveTestPage;
         if ($this->getActiveTestPage() === null)
         {
             return '';
         }
 
-        // Get active page index $this->activePageIndex. Attention: first index is 0
+        // Set class property $this->activePageIndex. Attention: first index is 0
         $this->getActivePageIndex();
 
-        // Get $this->pagesTotal
+        // Set class property $this->pagesTotal
+        $this->getPagesTotal();
+
+        // Set class property $this->firstTestPage
+        $this->getFirstTestPage();
+
+        // Set class property $this->LastTestPage
+        $this->getLastTestPage();
+
+        // Set class property $this->pagesTotal
         $this->getPagesTotal();
 
         return parent::generate();
@@ -125,7 +146,7 @@ class ModuleTestForm extends Module
         $this->generateForm();
 
         $this->Template->form = $this->form;
-        $this->Template->arrFields = $this->arrFields;
+        $this->Template->arrQuestionFields = $this->arrQuestionFields;
         $this->Template->objActiveTestPage = $this->objActiveTestPage;
         $this->Template->objActiveTestSession = $this->objActiveTestSession;
         $this->Template->activeTestPageIndex = $this->activeTestPageIndex;
@@ -142,11 +163,12 @@ class ModuleTestForm extends Module
      */
     protected function generateForm()
     {
+        //Set class property $this->form
         $this->form = new \Haste\Form\Form('testform', 'POST', function ($objHaste) {
             return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
         });
 
-        $arrFields = [];
+        $arrQuestionFields = [];
         if (($objTestPage = $this->getTestPage()) !== null)
         {
             $objQuestions = Database::getInstance()->prepare(/** @lang mysql */
@@ -155,30 +177,34 @@ class ModuleTestForm extends Module
             {
                 $ffname = 'test_question_' . $objQuestions->id;
 
-                $arrFields[] = $ffname;
+                $arrQuestionFields[] = $ffname;
                 $this->form->addFormField($ffname, array(
                     'label'     => array('', $objQuestions->questionText),
                     //'label'     => array('This is the legend', 'This is the label'),
                     'inputType' => 'checkbox',
-                    'eval'      => array('template' => 'form_checkbox_pretty', 'checkboxClass' => $this->checkboxClass, 'stateClass' => $this->stateClass, 'mandatory' => false),
+                    'eval'      => array('htmlPre' => $objQuestions->htmlPre, 'htmlPost' => $objQuestions->htmlPost, 'template' => 'form_checkbox_pretty', 'checkboxClass' => $this->checkboxClass, 'stateClass' => $this->stateClass, 'mandatory' => false),
 
                 ));
             }
         }
-        $this->arrFields = $arrFields;
 
+        // Set class property $this->arrQuestionFields
+        $this->arrQuestionFields = $arrQuestionFields;
+
+        // Add hidden fields
         $this->form->addContaoHiddenFields();
-        $this->form->addSubmitFormField('submit', 'weiter');
+
+        // Add a submit button
+        $this->form->addSubmitFormField('submit', $GLOBALS['TL_LANG']['MSC']['testFormSubmitBtn']);
 
         // validate() also checks whether the form has been submitted
         if ($this->form->validate())
         {
-            $intFalseAnswers = 0;
-            $intTrueAnswers = 0;
+            // Count wrong & correct answers
+            $intWrongAnswers = 0;
+            $intCorrectAnswers = 0;
 
-            $arrFormFields = $this->form->getFormFields();
-
-            foreach ($arrFormFields as $fieldname => $value)
+            foreach ($this->arrQuestionFields as $fieldname)
             {
                 if (($questionId = (integer)str_replace('test_question_', '', $fieldname)) > 0)
                 {
@@ -197,44 +223,49 @@ class ModuleTestForm extends Module
                         {
                             $objWidget->addError($GLOBALS['TL_LANG']['MSC']['wrongAnswer']);
                         }
-                        $intFalseAnswers++;
+                        $intWrongAnswers++;
                     }
                     else
                     {
-                        $intTrueAnswers++;
+                        $intCorrectAnswers++;
                     }
                     $objSessionQuestionResponseLog->save();
                 }
             }
 
-            // Save answer to db
+            // Save data to tl_test_session_page_response_log
             $objSessionPageResponseLog = new TestSessionPageResponseLogModel();
             $objSessionPageResponseLog->pid = $this->objActiveTestSession->id;
             $objSessionPageResponseLog->tstamp = time();
             $objSessionPageResponseLog->testPageId = $this->objActiveTestPage->id;
-            $objSessionPageResponseLog->trueAnswers = $intTrueAnswers;
-            $objSessionPageResponseLog->falseAnswers = $intFalseAnswers;
+            $objSessionPageResponseLog->trueAnswers = $intCorrectAnswers;
+            $objSessionPageResponseLog->falseAnswers = $intWrongAnswers;
             $objSessionPageResponseLog->save();
-            $this->objActiveTestSession->tstamp = time();
 
+            // Save data to tl_test_session
+            $this->objActiveTestSession->tstamp = time();
             $this->objActiveTestSession->save();
 
             // Redirect and close test session if all questions have been answered at least 1x
-            if ($intFalseAnswers === 0 && $this->getLastTestPage() !== null && $this->getLastTestPage()->id === $this->objActiveTestPage->id)
+            if ($intWrongAnswers === 0 && $this->objLastTestPage !== null)
             {
-                $this->objActiveTestSession->hasFinished = '1';
-                $this->objActiveTestSession->timeEnd = time();
-                $this->objActiveTestSession->save();
-
-                // Jump to test evaluation page or reload
-                if (($objPage = PageModel::findPublishedById($this->jumpToTestEvaluation)) !== null)
+                if ($this->objLastTestPage->id === $this->objActiveTestPage->id)
                 {
-                    $url = $objPage->getFrontendUrl() . '?testsessionid=' . base64_encode($this->objActiveTestSession->id);
-                    $this->redirect($url);
+                    $this->objActiveTestSession->hasFinished = '1';
+                    $this->objActiveTestSession->timeEnd = time();
+                    $this->objActiveTestSession->save();
+
+                    // Jump to test evaluation page or reload
+                    if (($objPage = PageModel::findPublishedById($this->jumpToTestEvaluation)) !== null)
+                    {
+                        $url = $objPage->getFrontendUrl() . '?testsessionid=' . base64_encode($this->objActiveTestSession->id);
+                        $this->redirect($url);
+                    }
                 }
             }
 
-            if ($intFalseAnswers === 0)
+            // Only lead to text test page, if all questions were answered correctly
+            if ($intWrongAnswers === 0)
             {
                 $this->reload();
             }
@@ -285,6 +316,7 @@ class ModuleTestForm extends Module
     }
 
     /**
+     * Set class property $this->objActiveTestSession
      * @return TestSessionModel
      */
     protected function getActiveTestSession()
@@ -310,6 +342,7 @@ class ModuleTestForm extends Module
     }
 
     /**
+     * Set class property $this->objActiveTestPage
      * @return TestPageModel|null
      * @throws \Exception
      */
@@ -350,6 +383,7 @@ class ModuleTestForm extends Module
     }
 
     /**
+     * Set class property $this->activeTestPageIndex
      * @return int|null
      * @throws \Exception
      */
@@ -380,6 +414,7 @@ class ModuleTestForm extends Module
     }
 
     /**
+     * Set class property $this->pagesTotal
      * @return int
      */
     protected function getPagesTotal()
@@ -391,6 +426,7 @@ class ModuleTestForm extends Module
     }
 
     /**
+     * Set class property $this->objLastTestPage
      * @return TestPageModel|null
      */
     protected function getLastTestPage()
@@ -399,9 +435,42 @@ class ModuleTestForm extends Module
             'SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting DESC')->limit(1)->execute($this->testitem);
         if ($objTestPage->numRows)
         {
-            return TestPageModel::findByPk($objTestPage->id);
+            $this->objLastTestPage = TestPageModel::findByPk($objTestPage->id);
+            return $this->objLastTestPage;
         }
 
+        return null;
+    }
+
+    /**
+     * Set class property $this->objFirstTestPage
+     * @return TestPageModel|null
+     */
+    protected function getFirstTestPage()
+    {
+        $objTestPage = Database::getInstance()->prepare(/** @lang mysql */
+            'SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting ASC')->limit(1)->execute($this->testitem);
+        if ($objTestPage->numRows)
+        {
+            $this->objFirstTestPage = TestPageModel::findByPk($objTestPage->id);
+            return $this->objFirstTestPage;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $intIndex
+     * @return TestPageModel|null
+     */
+    protected function getTestPageByPageIndex($intIndex)
+    {
+        $objTestPage = Database::getInstance()->prepare(/** @lang mysql */
+            'SELECT * FROM tl_test_page WHERE pid=? ORDER BY sorting ASC LIMIT 1 OFFSET ?')->execute($this->testitem, $intIndex);
+        if ($objTestPage->numRows)
+        {
+            return TestPageModel::findByPk($objTestPage->id);
+        }
         return null;
     }
 }

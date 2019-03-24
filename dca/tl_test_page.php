@@ -177,7 +177,7 @@ $GLOBALS['TL_DCA']['tl_test_page'] = array
             'exclude'     => true,
             'search'      => true,
             'inputType'   => 'textarea',
-            'eval'        => array('allowHtml' => true, 'class' => 'monospace', 'rte' => 'ace|html', 'helpwizard' => true),
+            'eval'        => array('allowHtml' => true, 'class' => 'monospace', 'rte' => 'tinyMCE', 'helpwizard' => true),
             'explanation' => 'insertTags',
             'sql'         => "mediumtext NULL"
         ),
@@ -187,7 +187,7 @@ $GLOBALS['TL_DCA']['tl_test_page'] = array
             'exclude'     => true,
             'search'      => true,
             'inputType'   => 'textarea',
-            'eval'        => array('allowHtml' => true, 'class' => 'monospace', 'rte' => 'ace|html', 'helpwizard' => true),
+            'eval'        => array('allowHtml' => true, 'class' => 'monospace', 'rte' => 'tinyMCE', 'helpwizard' => true),
             'explanation' => 'insertTags',
             'sql'         => "mediumtext NULL"
         ),

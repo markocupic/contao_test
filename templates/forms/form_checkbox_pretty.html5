@@ -2,6 +2,11 @@
 
 <?php $this->block('field'); ?>
 <div id="ctrl_<?= $this->id ?>" class="checkbox_container<?php if ($this->class) echo ' ' . $this->class; ?>">
+    <?php if($this->htmlPre): ?>
+        <div class="htmlPre">
+            <?= $this->htmlPre ?>
+        </div>
+    <?php endif; ?>
 
     <?php if ($this->label): ?>
     <legend>
@@ -36,8 +41,14 @@
         <?php endif; ?>
 
     <?php endforeach; ?>
-<?php if ($this->hasErrors()): ?>
-<p class="error"><?= $this->getErrorAsString() ?></p>
+    <?php if ($this->hasErrors()): ?>
+    <p class="error"><?= $this->getErrorAsString() ?></p>
+    <?php endif; ?>
+
+    <?php if($this->htmlPost): ?>
+    <div class="htmlPost">
+        <?= $this->htmlPost ?>
+    </div>
 <?php endif; ?>
 
 </div>
