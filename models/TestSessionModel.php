@@ -1,16 +1,14 @@
 <?php
 
 /*
- * This file is part of Contao.
+ * This file is part of Contao Test Bundle.
  *
- * (c) Leo Feyer
- *
- * @license LGPL-3.0-or-later
+ * (c) Marko Cupic by order of Erik Bender
+ * @author Marko Cupic <https://github.com/markocupic/contao-test-bundle>
+ * @license MIT
  */
 
 namespace Contao;
-
-use Contao\Model\Collection;
 
 /**
  * Class TestSessionModel

@@ -8,53 +8,45 @@
  * @license MIT
  */
 
-$GLOBALS['TL_DCA']['tl_test_session'] = array
+$GLOBALS['TL_DCA']['tl_test_session_question_response_log'] = array
 (
 
     // Config
     'config' => array
     (
         'dataContainer' => 'Table',
-        'ctable'        => array('tl_test_session_page_response_log'),
+        'ptable'        => 'tl_test_session',
         'sql'           => array
         (
             'keys' => array
             (
-                'id' => 'primary',
-                'testId,memberId' => 'index'
+                'id'             => 'primary',
+                'pid,testQuestionId' => 'index'
             )
         )
     ),
     // Fields
     'fields' => array
     (
-        'id'          => array
+        'id'              => array
         (
             'sql' => "int(10) unsigned NOT NULL auto_increment"
         ),
-        'tstamp'      => array
+        'pid'             => array
         (
             'sql' => "int(10) unsigned NOT NULL default '0'"
         ),
-        'testId'      => array
+        'tstamp'          => array
         (
             'sql' => "int(10) unsigned NOT NULL default '0'"
         ),
-        'timeStart'   => array
+        'testQuestionId'      => array
         (
             'sql' => "int(10) unsigned NOT NULL default '0'"
         ),
-        'timeEnd'     => array
-        (
-            'sql' => "int(10) unsigned NOT NULL default '0'"
-        ),
-        'hasFinished' => array
+        'correctAnswer'  => array
         (
             'sql' => "char(1) NOT NULL default ''"
-        ),
-        'memberId'    => array
-        (
-            'sql' => "int(10) unsigned NOT NULL default '0'"
         ),
     )
 );

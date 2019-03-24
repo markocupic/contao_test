@@ -1,9 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Marko
- * Date: 22.03.2019
- * Time: 20:50
+
+/*
+ * This file is part of Contao Test Bundle.
+ *
+ * (c) Marko Cupic by order of Erik Bender
+ * @author Marko Cupic <https://github.com/markocupic/contao-test-bundle>
+ * @license MIT
  */
 
-$GLOBALS['TL_LANG']['MSC']['ow_response_true'] = 'Aussage richtig';
+
+// Error messages
+$GLOBALS['TL_LANG']['MSC']['wrongAnswer'] = 'Diese Antwort ist leider nicht richtig.';
+$GLOBALS['TL_LANG']['MSC']['oneOrMoreFalseAnswers'] = 'Mindestens eine Antwort ist falsch. Versuchen Sie es noch einmal.';

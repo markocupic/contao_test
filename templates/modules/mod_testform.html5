@@ -3,8 +3,12 @@
 <?php $this->block('content'); ?>
 
 
-<h4><?= $this->objCurrentTestPage->title ?></h4>
-<h4>Test Session-ID: <?= $this->objCurrentTestSession->id ?></h4>
+<h4><?= $this->objActiveTestPage->title ?> Index: <?= $this->activeTestPageIndex+1 ?>/<?= $this->pagesTotal ?></h4>
+<h4>Test Session-ID: <?= $this->objActiveTestSession->id ?></h4>
+
+<?php if($this->messages): ?>
+<?= $this->messages ?>
+<?php endif; ?>
 
 <?php if($this->form): ?>
 <?php $GLOBALS['TL_CSS'][] = 'https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css'; ?>

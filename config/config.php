@@ -1,10 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Marko
- * Date: 22.03.2019
- * Time: 20:45
+
+/*
+ * This file is part of Contao Test Bundle.
+ *
+ * (c) Marko Cupic by order of Erik Bender
+ * @author Marko Cupic <https://github.com/markocupic/contao-test-bundle>
+ * @license MIT
  */
+
 
 // Back end modules
 $GLOBALS['BE_MOD']['testmodules'] = array

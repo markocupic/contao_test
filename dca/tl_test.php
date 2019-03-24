@@ -1,9 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Marko
- * Date: 22.03.2019
- * Time: 22:32
+
+/*
+ * This file is part of Contao Test Bundle.
+ *
+ * (c) Marko Cupic by order of Erik Bender
+ * @author Marko Cupic <https://github.com/markocupic/contao-test-bundle>
+ * @license MIT
  */
 
 $GLOBALS['TL_DCA']['tl_test'] = array

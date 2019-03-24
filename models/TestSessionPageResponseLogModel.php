@@ -11,19 +11,19 @@
 namespace Contao;
 
 /**
- * Class TestModel
+ * Class TestSessionPageResponseLogModel
  * @package Contao
  */
-class TestModel extends Model
+class TestSessionPageResponseLogModel extends Model
 {
 
 	/**
 	 * Table name
 	 * @var string
 	 */
-	protected static $strTable = 'tl_test';
+	protected static $strTable = 'tl_test_session_page_response_log';
 
 
 }
 
-class_alias(TestModel::class, 'TestModel');
+class_alias(TestSessionPageResponseLogModel::class, 'TestSessionPageResponseLogModel');
