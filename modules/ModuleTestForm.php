@@ -152,7 +152,7 @@ class ModuleTestForm extends Module
         $this->Template->activeTestPageIndex = $this->activeTestPageIndex;
         $this->Template->pagesTotal = $this->pagesTotal;
 
-        if (Message::hasMessages('FE'))
+        if (Message::hasMessages(TL_MODE))
         {
             $this->Template->messages = Message::generate();
         }
