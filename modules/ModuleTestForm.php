@@ -215,7 +215,7 @@ class ModuleTestForm extends Module
                     $objSessionQuestionResponseLog->testQuestionId = $questionId;
 
                     $objWidget = $this->form->getWidget($fieldname);
-                    if (!$this->isAnswerRight($objWidget, $questionId))
+                    if (!$this->isCorrectAnswer($objWidget, $questionId))
                     {
                         // Display error msg
                         Message::addError($GLOBALS['TL_LANG']['MSC']['oneOrMoreFalseAnswers'], TL_MODE);
@@ -278,7 +278,7 @@ class ModuleTestForm extends Module
      * @return bool
      * @throws \Exception
      */
-    protected function isAnswerRight($objWidget, $questionId)
+    protected function isCorrectAnswer($objWidget, $questionId)
     {
         $answer = Input::post($objWidget->name);
         $objQuestion = TestQuestionModel::findByPk($questionId);
