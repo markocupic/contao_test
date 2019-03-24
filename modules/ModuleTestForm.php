@@ -226,7 +226,7 @@ class ModuleTestForm extends Module
                     if (!$this->isCorrectAnswer($objWidget, $questionId))
                     {
                         // Display error msg
-                        Message::addError($GLOBALS['TL_LANG']['MSC']['oneOrMoreFalseAnswers'], TL_MODE);
+                        Message::addError($GLOBALS['TL_LANG']['MSC']['oneOrMoreWrongAnswers'], TL_MODE);
                         if ($this->displayErrMsg)
                         {
                             $objWidget->addError($GLOBALS['TL_LANG']['MSC']['wrongAnswer']);

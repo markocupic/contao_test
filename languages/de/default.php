@@ -11,7 +11,7 @@
 
 // Error messages
 $GLOBALS['TL_LANG']['MSC']['wrongAnswer'] = 'Diese Antwort ist leider nicht richtig.';
-$GLOBALS['TL_LANG']['MSC']['oneOrMoreFalseAnswers'] = 'Mindestens eine Antwort ist falsch. Versuchen Sie es noch einmal.';
+$GLOBALS['TL_LANG']['MSC']['oneOrMoreWrongAnswers'] = 'Mindestens eine Antwort ist falsch. Versuchen Sie es noch einmal.';
 
 //Buttons
 $GLOBALS['TL_LANG']['MSC']['testFormSubmitBtn'] = 'weiter';
